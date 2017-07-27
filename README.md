@@ -1,6 +1,6 @@
 # PHP OpenID Connect Basic Client
 
-(This package is a fork of [rask/openid-connect-php][3].)
+(This package is a fork of [kdoyen/openid-connect-php][3].)
 
 A simple library that allows an application to authenticate a user
 through the basic OpenID Connect flow. This library hopes to encourage
@@ -24,7 +24,7 @@ This package was originally created by [Michael Jett][2] and extensively modifie
 Install library using composer
 
 ```sh
-composer require kdoyen/openid-connect-php
+composer require hninayekhine-mm/openid-connect-php
 ```
 
 Then include composer autoloader
