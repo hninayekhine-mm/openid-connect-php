@@ -1,6 +1,6 @@
 # PHP OpenID Connect Basic Client
 
-(This package is a fork of [kdoyen/openid-connect-php][3].)
+(This package is a fork of [kdoyen/openid-connect-php](https://github.com/kdoyen/openid-connect-php).)
 
 A simple library that allows an application to authenticate a user
 through the basic OpenID Connect flow. This library hopes to encourage
