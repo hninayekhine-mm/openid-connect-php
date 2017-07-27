@@ -22,6 +22,7 @@ This package was originally created by [Michael Jett][2] and extensively modifie
 ## Install
 Update the project's composer.json.
 
+```sh
 "repositories": [
         {
             "type": "vcs",
@@ -31,7 +32,7 @@ Update the project's composer.json.
 "require": {
     "kdoyen/openid-connect-php":"dev-master"
 }
-
+```
 
 Install library using composer
 
