@@ -11,6 +11,7 @@ use phpseclib\Crypt\RSA;
  * Original author: Michael Jett <mjett@mitre.org>
  * Work appended by: Otto Rask <ojrask@gmail.com>
  * Work appended by: Kristopher Doyen <kristopher.doyen@gmail.com>
+ * Work appended by: Hnin Aye Khine <hninakhine@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -173,6 +174,22 @@ class OpenIdConnectClient
     public $urlRequester;
 
     /**
+     * Api Name used for introspecting token with OpenID provider.
+     *
+     * @access protected
+     * @var string
+     */
+    protected $apiName;
+
+    /**
+     * Api Secret (password) for OpenID provider.
+     *
+     * @access protected
+     * @var string
+     */
+    protected $apiSecret;
+
+    /**
      * OpenIdConnectClient constructor.
      *
      * @param string[] $provider_args Arguments for OIDC provider setup {
@@ -306,7 +323,7 @@ class OpenIdConnectClient
         if ($_REQUEST['state'] !== $this->getState()) {
             throw new OpenIdConnectException('Unable to determine session state');
         }
-
+        
         // Cleanup state
         $this->unsetState();
 
@@ -322,7 +339,7 @@ class OpenIdConnectClient
         } elseif (!$this->canVerifySignatures() && !$this->verifyJwtSignature($token_json->id_token)) {
             user_error('Warning: JWT signature verification unavailable.');
         }
-
+        
         // If this is an invalid claim
         if (!$this->verifyJwtClaims($claims, $token_json->access_token)) {
             throw new OpenIdConnectException('Unable to verify JWT claims');
@@ -336,7 +353,7 @@ class OpenIdConnectClient
 
         // Save the id token
         $this->idToken = $token_json->id_token;
-
+        
         // Save the access token
         $this->accessToken = $token_json->access_token;
 
@@ -741,7 +758,7 @@ class OpenIdConnectClient
 
         return false;
     }
-
+    
     /**
      * Verify a RSA JWT signature.
      *
@@ -777,8 +794,8 @@ class OpenIdConnectClient
             "  <Exponent>%s</Exponent>\r\n" .
             "</RSAKeyValue>";
 
-        $public_key_xml = sprintf($public_key_xml, b64url2b64($key->n), b64url2b64($key->e));
-
+        $public_key_xml = sprintf($public_key_xml, Utils::b64url2b64($key->n), Utils::b64url2b64($key->e));
+        
         $rsa = new RSA();
         $rsa->setHash($hashtype);
         $rsa->loadKey($public_key_xml, RSA::PUBLIC_FORMAT_XML);
@@ -841,12 +858,12 @@ class OpenIdConnectClient
         $expected_at_hash = isset($claims->at_hash) && isset($accessToken)
             ? $this->getJwtClaimsAtHashForAccessToken($accessToken)
             : '';
-
+        
         $provider_match = $claims->iss === $this->getProviderUrl();
         $client_id_match = ($claims->aud === $this->clientId) || (in_array($this->clientId, $claims->aud));
         $nonce_match = $claims->nonce === $this->getNonce();
         $claims_not_expired = !isset($claims->exp) || $claims->exp > time();
-        $claims_nbf_okay = !isset($claims->nbf) || $claims->nbf < time();
+        $claims_nbf_okay = $claims_nbf_okay = !isset($claims->nbf) || $claims->nbf <= time();
         $claims_hash_match = !isset($claims->at_hash) || $claims->at_hash === $expected_at_hash;
 
         return ($provider_match && $client_id_match && $nonce_match && $claims_not_expired && $claims_nbf_okay && $claims_hash_match);
@@ -1357,6 +1374,50 @@ class OpenIdConnectClient
         unset($_SESSION['openid_connect_state']);
     }
 
+/**
+     * Set the Api Name used for API authentication in introspection with OIDC provider.
+     *
+     * @param string $apiName
+     *
+     * @return void
+     */
+    public function setApiName($apiName)
+    {
+        $this->apiName = $apiName;
+    }
+
+    /**
+     * Get the Api name.
+     *
+     * @return string
+     */
+    public function getApiName()
+    {
+        return $this->apiName;
+    }
+
+    /**
+     * Set the Api secret used for API authentication in introspection with OIDC provider.
+     *
+     * @param string $apiSecret
+     *
+     * @return void
+     */
+    public function setApiSecret($apiSecret)
+    {
+        $this->apiSecret = $apiSecret;
+    }
+
+    /**
+     * Get the Api secret.
+     *
+     * @return string
+     */
+    public function getApiSecret()
+    {
+        return $this->apiSecret;
+    }
+    
     /**
      * Perform a token introspection on provided token with the OIDC provider.
      *
@@ -1409,7 +1470,8 @@ class OpenIdConnectClient
       ];
 
       // Consider Basic authentication if provider config is set this way
-      $basic_auth_header_value = base64_encode($this->clientId . ':' . $this->clientSecret);
+      //$basic_auth_header_value = base64_encode($this->clientId . ':' . $this->clientSecret);
+      $basic_auth_header_value = base64_encode($this->apiName . ':' . $this->apiSecret);
       $headers = ['Authorization: Basic ' . $basic_auth_header_value];
 
       // Convert token params to string format

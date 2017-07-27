@@ -1,4 +1,7 @@
 # Changes
+This project was forked from kdoyen/openid-connect-php to include following changes:
+- Changed basic authentication header for IdentityServer4 introspection end point.
+- Modified verifyRsaJwtSignature and verifyJwtClaims functions
 
 This project was forked from rask/openid-connect-php to include the following changes:
 
