@@ -20,11 +20,29 @@ This package was originally created by [Michael Jett][2] and extensively modifie
 3.  JSON extension
 
 ## Install
+Update the project's composer.json.
+
+"repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/hninayekhine-mm/openid-connect-php.git"
+        }
+    ],
+"require": {
+    "kdoyen/openid-connect-php":"dev-master"
+}
+
 
 Install library using composer
 
 ```sh
-composer require hninayekhine-mm/openid-connect-php
+php composer.phar update
+```
+
+or 
+
+```sh
+composer update
 ```
 
 Then include composer autoloader
